@@ -4,29 +4,20 @@ using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
-    Rigidbody myRigidbody;
-    Vector3 oldVel;
+    public LayerMask collisonMask;
+    public Transform blade;
+    public float Speed = 15;
 
-    void Start()
+    private void Update()
     {
-        myRigidbody = GetComponent<Rigidbody>();
-    }
-
-    void FixedUpdate()
-    {
-        oldVel = myRigidbody.velocity;
-    }
-
-    void OnCollisionEnter(Collision c)
-    {
-        ContactPoint cp = c.contacts[0];
-        // calculate with addition of normal vector
-        // myRigidbody.velocity = oldVel + cp.normal*2.0f*oldVel.magnitude;
-
-        // calculate with Vector3.Reflect
-        myRigidbody.velocity = Vector3.Reflect(oldVel, cp.normal);
-
-        // bumper effect to speed up ball
-        myRigidbody.velocity += cp.normal * 2.0f;
+        transform.Translate(Vector3.forward * Time.deltaTime * Speed);
+        Ray ray = new Ray(transform.position, transform.forward);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, Time.deltaTime * Speed + 1f, collisonMask))
+        {
+            Vector3 reflectDir = Vector3.Reflect(ray.direction, hit.normal);
+            float rot = 90 - Mathf.Atan2(reflectDir.z, reflectDir.x) * Mathf.Rad2Deg;
+            transform.eulerAngles = new Vector3(0, rot, 0);
+        }
     }
 }
